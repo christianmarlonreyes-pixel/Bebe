@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" class="loading-lock">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Girl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=Italiana&family=Alike&family=Playfair+Display&family=Cormorant+Garamond&family=EB+Garamond&family=Marcellus&family=Cinzel&family=Prata&family=Bodoni+Moda&family=Abril+Fatface&family=Fraunces&family=Spectral&family=Roboto:wght@200;300&family=Work+Sans:wght@200;300&family=Manrope:wght@200;300&family=Karla:wght@200;300&family=DM+Sans:wght@200;300&family=Sora:wght@200;300&family=Plus+Jakarta+Sans:wght@200;300&family=Outfit:wght@200;300&family=Space+Grotesk:wght@200;300&family=Public+Sans:wght@200;300&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:#f9f9f9; overflow-x:hidden; }
+  /* Locks the page from scrolling behind the loading screen; removed
+     by JS the instant the loading screen is dismissed. */
+  html.loading-lock, body.loading-lock { overflow-y:hidden; height:100%; }
+  #wrapper { position:relative; overflow:hidden; margin:0 auto; }
+  #canvas {
+    position:relative;
+    width:1920px;
+    height:4812px;
+    background:#f9f9f9;
+    transform-origin: top left;
+  }
+  .abs { position:absolute; }
+  .dark-section {
+    position:absolute; left:0; top:1975px; width:1920px; height:2837px; background:#0c0c0c;
+  }
+  .nav-link { font-family:'Inter', sans-serif; font-weight:400; font-size:19.064px; color:#fff; text-decoration:none; white-space:nowrap; }
+  #navFixedWrap {
+    position:fixed;
+    left:50%;
+    top:0;
+    z-index:1000;
+    transform: translateX(-50%);
+    pointer-events:none;
+  }
+  #navFixedWrap .nav-pill-inner {
+    pointer-events:auto;
+    transform-origin: top center;
+  }
+  @keyframes floatWord {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-7px); }
+  }
+  .scatter-word-wrap {
+    cursor:default;
+    display:inline-block;
+    animation: floatWord 4s ease-in-out infinite;
+  }
+  .scatter-word-wrap:hover {
+    z-index:50;
+  }
+  .scatter-word {
+    font-family:'Alike', serif;
+    font-size:37.028px;
+    color:#000;
+    text-transform:uppercase;
+    white-space:nowrap;
+    position:relative;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .scatter-word-wrap:hover .scatter-word {
+    opacity:0;
+    transform: scale(0.9);
+  }
+  .scatter-msg {
+    position:absolute;
+    top:50%; left:0;
+    display:inline-block;
+    width:max-content;
+    max-width:260px;
+    font-family:'Inter', sans-serif;
+    font-weight:300;
+    font-size:17px;
+    color:#000;
+    white-space:normal;
+    line-height:1.4;
+    background:#fff;
+    border:1.5px solid transparent;
+    border-radius:14px;
+    padding:14px 18px;
+    opacity:0;
+    pointer-events:none;
+    transform: translateY(-50%) scale(0.85);
+    transform-origin: left center;
+    transition:
+      opacity 0.3s ease,
+      transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-color 0.35s ease;
+  }
+  .scatter-word-wrap:hover .scatter-msg {
+    opacity:1;
+    pointer-events:auto;
+    transform: translateY(-50%) scale(1);
+    border-color:#000;
+  }
+  .nav-pill-inner {
+    display:inline-flex;
+    align-items:center;
+    height:56px;
+    box-sizing:border-box;
+    border-radius:41px;
+    background:#000000;
+    border:1.5px solid transparent;
+    padding:0 28px;
+    gap:26px;
+    white-space:nowrap;
+    transition: background-color 0.35s ease, border-color 0.35s ease, padding 0.35s ease, gap 0.35s ease;
+  }
+  .nav-pill-inner.collapsed {
+    background:#ffffff;
+    border-color:#000000;
+    padding:0 24px;
+    gap:0;
+  }
+  .nav-pill-inner .nav-link {
+    position:relative;
+    display:inline-block;
+    padding:9px 16px;
+    border-radius:30px;
+    max-width:220px;
+    opacity:1;
+    overflow:hidden;
+    transition: max-width 0.35s ease, opacity 0.3s ease, padding 0.35s ease, margin 0.35s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+  .nav-pill-inner .nav-link:hover {
+    background: rgba(255,255,255,0.16);
+  }
+  .nav-pill-inner.collapsed .nav-link {
+    max-width:0;
+    opacity:0;
+    padding:9px 0;
+    margin:0;
+    pointer-events:none;
+  }
+  .nav-pill-inner.collapsed .nav-link.active {
+    max-width:220px;
+    opacity:1;
+    padding:9px 16px;
+    color:#000;
+    pointer-events:auto;
+  }
+  .nav-pill-inner.collapsed .nav-link.active:hover {
+    background: rgba(0,0,0,0.08);
+  }
+  .go-back-btn {
+    position:relative;
+    overflow:hidden;
+    z-index:1;
+    background:#fff; border-radius:58.56px; border:1.5px solid #fff; cursor:pointer;
+    font-family:'Inter', sans-serif; font-weight:300; font-size:23.045px; color:#000;
+    display:flex; align-items:center; justify-content:center;
+    transition: color 0.35s ease, border-color 0.35s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .go-back-btn::before {
+    content:'';
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:#0c0c0c;
+    border-radius:inherit;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+    z-index:-1;
+  }
+  .go-back-btn:hover {
+    color:#fff;
+    border-color:#fff;
+    transform: scale(1.04);
+  }
+  .go-back-btn:hover::before {
+    transform: scaleX(1);
+  }
+  .go-back-btn:active {
+    transform: scale(0.96);
+  }
+  .go-back-btn.scroll-reveal-fade {
+    transition: opacity 0.8s ease, color 0.35s ease, border-color 0.35s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  img { display:block; }
+  .letter p { margin-bottom: 0.9em; }
+  .letter p:last-child { margin-bottom: 0; }
+
+  /* ===== Loading Screen ===== */
+  /* Minimalist on purpose: a white field, one line of serif type, and
+     a thin rule that draws itself underneath -- no spinner, no logo. */
+  #loadingScreen {
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: opacity 0.9s ease, visibility 0.9s ease;
+  }
+  #loadingScreen.hide {
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+  }
+  #loadingScreen .loading-inner {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  #loadingScreen .loading-text {
+     font-family:'Alike', serif;
+     font-size:clamp(19px, 2.4vw, 32px);
+     color:#000;
+     text-transform:uppercase;
+     letter-spacing:10px;
+     opacity:0;
+     animation: loadingTextIn 1.25s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes loadingTextIn {
+     from { opacity:0; letter-spacing:17px; transform:translateY(8px); }
+     to   { opacity:1; letter-spacing:10px; transform:translateY(0); }
+  }
+
+  /* ===== Entrance reveal animations (played once on load, hero only) ===== */
+  .hero-name, .hero-subtitle {
+    opacity:0;
+  }
+  .reveal-img {
+    opacity:0;
+    clip-path: inset(0 0 100% 0);
+    transform: scale(1.06);
+  }
+  .hero-name.in, .hero-subtitle.in {
+    animation: revealUp 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  .reveal-img.in {
+    animation: heroWipeUp 1.15s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes revealUp {
+    from { opacity:0; transform: translateY(26px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  @keyframes heroWipeUp {
+    0%   { opacity:0; clip-path: inset(0 0 100% 0); transform: scale(1.06); }
+    45%  { opacity:1; }
+    100% { opacity:1; clip-path: inset(0 0 0% 0); transform: scale(1); }
+  }
+  .scatter-word-wrap {
+    opacity:0;
+    transition: opacity 0.7s ease;
+  }
+  .scatter-word-wrap.in {
+    opacity:1;
+  }
+
+  /* ===== Premium scroll-triggered reveals =====
+     IMPORTANT: these styles are dormant until JS adds .scroll-ready.
+     This prevents scroll animations from competing with the initial
+     onload/hero entrance sequence. */
+  html:not(.scroll-ready) .scroll-reveal,
+  html:not(.scroll-ready) .scroll-reveal-img,
+  html:not(.scroll-ready) .gallery-reveal,
+  html:not(.scroll-ready) .scroll-reveal-line,
+  html:not(.scroll-ready) .scroll-reveal-fade {
+    opacity:1;
+    transform:none;
+    clip-path:inset(0 0 0 0);
+    transition:none;
+  }
+
+  html.scroll-ready .scroll-reveal {
+    opacity:0;
+    transform:translate3d(0, 58px, 0) scale(0.985);
+    filter:blur(5px);
+    transition:
+      opacity 0.95s cubic-bezier(0.16,1,0.3,1),
+      transform 1.05s cubic-bezier(0.16,1,0.3,1),
+      filter 1.05s cubic-bezier(0.16,1,0.3,1);
+    will-change:opacity, transform, filter;
+  }
+
+  html.scroll-ready .scroll-reveal.in {
+    opacity:1;
+    transform:translate3d(0, 0, 0) scale(1);
+    filter:blur(0);
+  }
+
+  html.scroll-ready .scroll-reveal-img {
+    opacity:0;
+    transform:translate3d(0, 72px, 0) scale(0.96);
+    filter:blur(7px);
+    transition:
+      opacity 1.15s cubic-bezier(0.16,1,0.3,1),
+      transform 1.25s cubic-bezier(0.16,1,0.3,1),
+      filter 1.25s cubic-bezier(0.16,1,0.3,1);
+    will-change:opacity, transform, filter;
+  }
+
+  html.scroll-ready .scroll-reveal-img.in {
+    opacity:1;
+    transform:translate3d(0, 0, 0) scale(1);
+    filter:blur(0);
+  }
+
+  html.scroll-ready .gallery-reveal {
+    opacity:0;
+    transform:translate3d(0, 70px, 0) scale(0.965);
+    clip-path:inset(0 0 9% 0);
+    filter:brightness(0.82) blur(5px);
+    transition:
+      opacity 1.1s cubic-bezier(0.16,1,0.3,1),
+      transform 1.2s cubic-bezier(0.16,1,0.3,1),
+      clip-path 1.25s cubic-bezier(0.16,1,0.3,1),
+      filter 1.25s cubic-bezier(0.16,1,0.3,1);
+    will-change:opacity, transform, clip-path, filter;
+  }
+
+  html.scroll-ready .gallery-reveal.wipe-r {
+    clip-path:inset(0 100% 0 0);
+  }
+
+  html.scroll-ready .gallery-reveal.wipe-u {
+    clip-path:inset(100% 0 0 0);
+  }
+
+  html.scroll-ready .gallery-reveal.in,
+  html.scroll-ready .gallery-reveal.wipe-r.in,
+  html.scroll-ready .gallery-reveal.wipe-u.in {
+    opacity:1;
+    transform:translate3d(0, 0, 0) scale(1);
+    clip-path:inset(0 0 0 0);
+    filter:brightness(1) blur(0);
+  }
+
+  html.scroll-ready .scroll-reveal-line {
+    transform:scaleY(0);
+    transform-origin:top center;
+    transition:transform 1.25s cubic-bezier(0.16,1,0.3,1);
+    will-change:transform;
+  }
+
+  html.scroll-ready .scroll-reveal-line.in {
+    transform:scaleY(1);
+  }
+
+  html.scroll-ready .scroll-reveal-fade {
+    opacity:0;
+    transform:translate3d(0, 20px, 0);
+    transition:
+      opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+      transform 0.9s cubic-bezier(0.16,1,0.3,1),
+      color 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  html.scroll-ready .scroll-reveal-fade.in {
+    opacity:1;
+    transform:translate3d(0, 0, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.scroll-ready .scroll-reveal,
+    html.scroll-ready .scroll-reveal-img,
+    html.scroll-ready .gallery-reveal,
+    html.scroll-ready .scroll-reveal-line,
+    html.scroll-ready .scroll-reveal-fade {
+      opacity:1 !important;
+      transform:none !important;
+      filter:none !important;
+      clip-path:inset(0 0 0 0) !important;
+      transition:none !important;
+    }
+  }
+
+</style>
+</head>
+<body class="loading-lock">
+<div id="loadingScreen">
+  <div class="loading-inner">
+    <p class="loading-text">Loading, My Love</p>
+  </div>
+</div>
+<div id="navFixedWrap">
+  <div class="nav-pill-inner collapsed" id="navPillInner">
+    <a class="nav-link active" href="#top" data-target="0">Home</a>
+    <a class="nav-link" href="#about" data-target="1975">About Her</a>
+    <a class="nav-link" href="#missive" data-target="2748">Missive</a>
+  </div>
+</div>
+<div id="wrapper">
+  <div id="canvas">
+
+    <!-- ===== NAME ===== -->
+    <p class="abs hero-name" id="top" style="left:93px; top:524px; font-family:'Italiana', serif; font-size:45.169px; color:#000; white-space:nowrap;">Christine Mae M. Angel</p>
+    <p class="abs hero-subtitle" style="left:93px; top:576.7px; font-family:'Inter', sans-serif; font-weight:200; font-size:17.514px; color:#000; white-space:nowrap;">My Love Of My Life</p>
+
+    <!-- ===== HERO IMAGE ===== -->
+    <div class="abs reveal-img" style="left:747px; top:135px; width:460px; height:945px; overflow:hidden;">
+      <img src="images/christine-pose1.png" alt="Christine" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+
+    <!-- ===== SCATTERED WORDS ===== -->
+    <div class="abs scatter-word-wrap" style="left:238px; top:235px; animation-delay:0s; animation-duration:4.2s;">
+      <p class="scatter-word">Hottest Person Ever</p>
+      <p class="scatter-msg">Literally the hottest person I have ever seen.</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:1356px; top:317px; animation-delay:0.6s; animation-duration:3.8s;">
+      <p class="scatter-word">The Best Girlfriend</p>
+      <p class="scatter-msg">She&rsquo;s the BEST!</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:219px; top:369px; animation-delay:1.1s; animation-duration:4.5s;">
+      <p class="scatter-word">Incomparable</p>
+      <p class="scatter-msg">Nothing compares to my Love.</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:1389px; top:540px; animation-delay:0.3s; animation-duration:4s;">
+      <p class="scatter-word">Radiant</p>
+      <p class="scatter-msg">You shine so bright in a room full of people.</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:1633px; top:670px; animation-delay:1.6s; animation-duration:3.6s;">
+      <p class="scatter-word">Gorgeous</p>
+      <p class="scatter-msg">Need I say more? LOOK AT THE PICTURES</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:135px; top:725px; animation-delay:0.9s; animation-duration:4.3s;">
+      <p class="scatter-word">Stunning</p>
+      <p class="scatter-msg">Literally every time I look at you I stop for a moment.</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:1429px; top:839px; animation-delay:1.9s; animation-duration:4.1s;">
+      <p class="scatter-word">Captivating</p>
+      <p class="scatter-msg">You grab my attention even if you are doing nothing.</p>
+    </div>
+    <div class="abs scatter-word-wrap" style="left:317px; top:848px; animation-delay:0.4s; animation-duration:3.9s;">
+      <p class="scatter-word">Brilliant</p>
+      <p class="scatter-msg">The best in the archi department.</p>
+    </div>
+
+    <!-- ===== GALLERY ===== -->
+    <div class="abs gallery-reveal" style="left:0px; top:1080px; width:640px; height:895px; overflow:hidden; transition-delay:0ms;">
+      <img src="images/pose2.png" alt="Pose 2" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+    <div class="abs gallery-reveal wipe-r" style="left:640px; top:1080px; width:640px; height:895px; overflow:hidden; transition-delay:100ms;">
+      <img src="images/pose3.png" alt="Pose 3" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+    <div class="abs gallery-reveal wipe-u" style="left:1280px; top:1080px; width:640px; height:895px; overflow:hidden; transition-delay:200ms;">
+      <img src="images/pose4.png" alt="Pose 4" style="width:100%; height:100%; object-fit:cover;">
+    </div>
+
+    <!-- ===== DARK SECTION ===== -->
+    <div class="dark-section" id="about">
+
+      <p class="abs scroll-reveal" style="left:250px; top:214px; font-family:'Alike', serif; font-size:56.722px; color:#fff; text-transform:uppercase;">About Her</p>
+      <p class="abs scroll-reveal" style="left:250px; top:310.64px; width:604px; font-family:'Inter', sans-serif; font-weight:300; font-size:40.094px; color:#fff; text-align:justify;">She&rsquo;s the hottest person I have ever met. The surprising thing is I&rsquo;m her Boyfriend!</p>
+      <p class="abs scroll-reveal" style="left:250px; top:477.75px; font-family:'Inter', sans-serif; font-weight:300; font-size:17.631px; color:#fff; white-space:nowrap;">Christian Reyes</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:172px; width:435px; font-family:'Alike', serif; font-size:56.722px; color:#fff; text-transform:uppercase;">Her Stats</p>
+      <div class="abs scroll-reveal-line" style="left:954px; top:105px; width:1px; height:549px; background:#fff;"></div>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:257px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Height</p>
+      <p class="abs scroll-reveal" style="left:1517px; top:257px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">5&rsquo;4&rdquo;</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:304px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Bust</p>
+      <p class="abs scroll-reveal" style="left:1517px; top:303px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">She&rsquo;s Hot</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:350px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Waist</p>
+      <p class="abs scroll-reveal" style="left:1518px; top:350px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">She&rsquo;s Hot</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:397px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Hips</p>
+      <p class="abs scroll-reveal" style="left:1519px; top:397px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">She&rsquo;s Hot</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:444px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Hair Color</p>
+      <p class="abs scroll-reveal" style="left:1521px; top:444px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">She&rsquo;s Hot</p>
+
+      <p class="abs scroll-reveal" style="left:1055px; top:491px; font-family:'Inter', sans-serif; font-weight:300; font-size:30.589px; color:#fff; white-space:nowrap;">Eye Color</p>
+      <p class="abs scroll-reveal" style="left:1522px; top:491px; font-family:'Inter', sans-serif; font-weight:400; font-size:30.589px; color:#fff; white-space:nowrap;">She&rsquo;s Hot</p>
+
+      <p class="abs scroll-reveal" id="missive" style="left:841px; top:773px; font-family:'Alike', serif; font-size:56.722px; color:#fff; text-transform:uppercase; white-space:nowrap;">Missive</p>
+      <p class="abs scroll-reveal" style="left:250px; top:870px; font-family:'Inter', sans-serif; font-weight:500; font-size:31.509px; color:#fff; white-space:nowrap;">To My Dearest Christine.</p>
+
+      <div class="abs letter" style="left:250px; top:952px; width:1420px; font-family:'Inter', sans-serif; font-weight:300; font-size:31.509px; color:#fff; text-align:justify; line-height:normal;">
+        <p class="scroll-reveal">Every time I look at your pictures or you in person, I always think how did I get so lucky? For a woman like you to come into my life. A kind, sweet, hot, sexy, smart, tall, beautiful woman. That&rsquo;s literally my dream girl, you are what I needed, what I was missing in my life.</p>
+        <p class="scroll-reveal">Someone I could talk to everyday.</p>
+        <p class="scroll-reveal">Someone I could tell my problems.</p>
+        <p class="scroll-reveal">Someone to love my imperfections.</p>
+        <p class="scroll-reveal">Someone to care for me.</p>
+        <p class="scroll-reveal">Someone who will understand me.</p>
+        <p class="scroll-reveal">Someone who will stand with me to the end no matter what.</p>
+        <p class="scroll-reveal">We have been together for 3 years now, and In our relationship, my love for you has never even changed. Every time we hangout, I enjoy every single part of it. Even simple hangouts like just talking in somewhere makes my day already. Every since I met you, hard days became less harder and more manageable, boring days got less boring, lonely days did not make it less lonely but remove the loneliness overall.</p>
+        <p class="scroll-reveal">I feel more free when I am with you, more comfortable. People say home is when someone give them a deep sense of safety, peace, and total acceptance. You&rsquo;re my Home, I feel safe with you. I have never loved anyone like how I love you, I have never been so comfortable with anyone in my entire life.</p>
+        <p class="scroll-reveal">I&rsquo;m reminding you that you are not one of the good things that happened in my life. You&rsquo;re at the core of it.</p>
+        <p class="scroll-reveal">I love you deeply my Love, You are important. To me specifically. You</p>
+      </div>
+
+      <p class="abs scroll-reveal" style="left:250px; top:2174px; font-family:'Inter', sans-serif; font-weight:500; font-size:31.509px; color:#fff; white-space:nowrap;">From your Boyfriend</p>
+      <div class="abs scroll-reveal-img" style="left:310px; top:2193px; width:265.963px; height:270.516px;">
+        <img src="images/signature.png" alt="Signature" style="width:100%; height:100%; object-fit:contain;">
+      </div>
+      <p class="abs scroll-reveal" style="left:250px; top:2292px; width:386px; font-family:'Inter', sans-serif; font-weight:300; font-size:31.509px; color:#fff;">Christian Marlon G. Reyes</p>
+
+      <p class="abs scroll-reveal" style="left:250px; top:2544px; font-family:'Inter', sans-serif; font-weight:300; font-size:26.909px; color:#fff; white-space:nowrap;">Made with Love</p>
+      <p class="abs scroll-reveal" style="left:250px; top:2584px; font-family:'Inter', sans-serif; font-weight:300; font-size:35.098px; color:#fff; white-space:nowrap;">Made By C</p>
+      <p class="abs scroll-reveal" style="left:250px; top:2633px; font-family:'Inter', sans-serif; font-weight:300; font-size:26.909px; color:#fff; white-space:nowrap;">christianmarlonreyes@gmail.com</p>
+
+      <button class="abs go-back-btn scroll-reveal-fade" style="left:1426px; top:2574px; width:244px; height:61.222px;" onclick="window.scrollTo({top:0, behavior:'smooth'})">Go back</button>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  var currentScale = 1;
+
+  function resizeCanvas() {
+    var canvas = document.getElementById('canvas');
+    var wrapper = document.getElementById('wrapper');
+    // Scale to fit the full width of the viewport only. This keeps the
+    // canvas edge-to-edge horizontally with no leftover side margins,
+    // so there's no gap that could ever show through as a white or
+    // mismatched-color strip. Vertically the page simply scrolls.
+    currentScale = window.innerWidth / 1920;
+    canvas.style.transform = 'scale(' + currentScale + ')';
+    wrapper.style.width = (1920 * currentScale) + 'px';
+    wrapper.style.height = (4812 * currentScale) + 'px';
+
+    // The navbar lives outside the scaled canvas (so position:fixed
+    // actually works), so scale and offset it to match by hand.
+    var navPillInner = document.getElementById('navPillInner');
+    var navFixedWrap = document.getElementById('navFixedWrap');
+    navPillInner.style.transform = 'scale(' + currentScale + ')';
+    navFixedWrap.style.top = (47 * currentScale) + 'px';
+  }
+
+  // Because the page is scaled with a CSS transform, the browser's native
+  // #anchor jump can fire before this script has corrected the page's
+  // scroll height, landing in the wrong spot. Instead, nav links scroll
+  // using the live scale factor so they always land exactly on target.
+  function scrollToTarget(canvasY) {
+    window.scrollTo({ top: canvasY * currentScale, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.nav-link').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var hash = link.getAttribute('href');
+      history.replaceState(null, '', hash);
+      scrollToTarget(parseFloat(link.getAttribute('data-target')));
+    });
+  });
+
+  // ===== Navbar collapse/expand + active-section tracking =====
+  var navFixedWrap = document.getElementById('navFixedWrap');
+  var navPillInner = document.getElementById('navPillInner');
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-link'));
+  var navTargets = navLinks.map(function (l) { return parseFloat(l.getAttribute('data-target')); });
+
+  function setActiveLink() {
+    var canvasY = window.scrollY / currentScale;
+    // Pick the last nav target the user has scrolled past.
+    var activeIdx = 0;
+    for (var i = 0; i < navTargets.length; i++) {
+      if (canvasY >= navTargets[i] - 40) activeIdx = i;
+    }
+    navLinks.forEach(function (l, i) {
+      l.classList.toggle('active', i === activeIdx);
+    });
+  }
+
+  navFixedWrap.addEventListener('mouseenter', function () {
+    navPillInner.classList.remove('collapsed');
+  });
+  navFixedWrap.addEventListener('mouseleave', function () {
+    navPillInner.classList.add('collapsed');
+  });
+
+  window.addEventListener('scroll', setActiveLink);
+
+  // ===== Name hover: shuffle through similar fonts =====
+  var heroName = document.querySelector('.hero-name');
+  var originalNameFont = "'Italiana', serif";
+  var fontChoices = [
+    "'Playfair Display', serif",
+    "'Cormorant Garamond', serif",
+    "'EB Garamond', serif",
+    "'Marcellus', serif",
+    "'Cinzel', serif",
+    "'Prata', serif",
+    "'Bodoni Moda', serif",
+    "'Abril Fatface', serif",
+    "'Fraunces', serif",
+    "'Spectral', serif"
+  ];
+  var fontShuffleTimer = null;
+
+  heroName.addEventListener('mouseenter', function () {
+    var i = 0;
+    clearInterval(fontShuffleTimer);
+    fontShuffleTimer = setInterval(function () {
+      heroName.style.fontFamily = fontChoices[i % fontChoices.length];
+      i++;
+    }, 110);
+  });
+
+  heroName.addEventListener('mouseleave', function () {
+    clearInterval(fontShuffleTimer);
+    heroName.style.fontFamily = originalNameFont;
+  });
+
+  // ===== Subtitle hover: shuffle through similar sans-serif fonts =====
+  var heroSubtitle = document.querySelector('.hero-subtitle');
+  var originalSubtitleFont = "'Inter', sans-serif";
+  var subtitleFontChoices = [
+    "'Roboto', sans-serif",
+    "'Work Sans', sans-serif",
+    "'Manrope', sans-serif",
+    "'Karla', sans-serif",
+    "'DM Sans', sans-serif",
+    "'Sora', sans-serif",
+    "'Plus Jakarta Sans', sans-serif",
+    "'Outfit', sans-serif",
+    "'Space Grotesk', sans-serif",
+    "'Public Sans', sans-serif"
+  ];
+  var subtitleFontShuffleTimer = null;
+
+  heroSubtitle.addEventListener('mouseenter', function () {
+    var i = 0;
+    clearInterval(subtitleFontShuffleTimer);
+    subtitleFontShuffleTimer = setInterval(function () {
+      heroSubtitle.style.fontFamily = subtitleFontChoices[i % subtitleFontChoices.length];
+      i++;
+    }, 110);
+  });
+
+  heroSubtitle.addEventListener('mouseleave', function () {
+    clearInterval(subtitleFontShuffleTimer);
+    heroSubtitle.style.fontFamily = originalSubtitleFont;
+  });
+
+  // ===== Scroll-triggered reveal engine =====
+  // The observer is deliberately installed only AFTER the onload/entrance
+  // sequence. Until .scroll-ready is added, every reveal remains visible.
+  var scrollObserver = null;
+  var scrollRevealTimer = null;
+
+  function initScrollAnimations() {
+    document.documentElement.classList.add('scroll-ready');
+
+    var targets = document.querySelectorAll(
+      '.scroll-reveal, .scroll-reveal-img, .gallery-reveal, .scroll-reveal-line, .scroll-reveal-fade'
+    );
+
+    if (!targets.length) return;
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      targets.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+
+    if (scrollObserver) scrollObserver.disconnect();
+
+    scrollObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+
+        var el = entry.target;
+        var delay = parseInt(el.getAttribute('data-reveal-delay') || '0', 10);
+
+        setTimeout(function () {
+          el.classList.add('in');
+        }, delay);
+
+        // Reveal once: avoids replaying animations while scrolling up/down.
+        scrollObserver.unobserve(el);
+      });
+    }, {
+      root:null,
+      rootMargin:'-4% 0px -8% 0px',
+      threshold:0.04
+    });
+
+    targets.forEach(function (el, i) {
+      // Small, deterministic staggering for adjacent elements.
+      if (!el.hasAttribute('data-reveal-delay')) {
+        var delay = Math.min((i % 5) * 85, 340);
+        el.setAttribute('data-reveal-delay', String(delay));
+      }
+      scrollObserver.observe(el);
+    });
+  }
+
+  // ===== Onload entrance: hero section only =====
+  // Called once both the minimum loader time has passed and the window
+  // 'load' event has fired (see startPage below), so every image on the
+  // page -- pose 1 included -- is guaranteed to have already finished
+  // loading. That means there's nothing to poll or wait on here: every
+  // delay below is fixed, so nothing can stack up or run long.
+  function playEntranceAnimation() {
+    var heroName = document.querySelector('.hero-name');
+    var heroSubtitle = document.querySelector('.hero-subtitle');
+    var heroImg = document.querySelector('.reveal-img');
+    var scatterWraps = Array.prototype.slice.call(document.querySelectorAll('.scatter-word-wrap'));
+
+    if (heroName) {
+      setTimeout(function () { heroName.classList.add('in'); }, 100);
+    }
+    if (heroSubtitle) {
+      setTimeout(function () { heroSubtitle.classList.add('in'); }, 260);
+    }
+    if (heroImg) {
+      setTimeout(function () { heroImg.classList.add('in'); }, 80);
+    }
+    scatterWraps.forEach(function (el, i) {
+      setTimeout(function () { el.classList.add('in'); }, 620 + i * 80);
+    });
+  }
+
+  // Releases the scroll lock set on <html>/<body> (see .loading-lock).
+  function unlockScroll() {
+    document.documentElement.classList.remove('loading-lock');
+    document.body.classList.remove('loading-lock');
+  }
+
+  // ===== Safety net: never let anything stay stuck invisible or locked =====
+  // Covers only genuine failure cases (a JS error elsewhere, 'load' never
+  // firing) -- the timeline above is fixed and always finishes well
+  // before this fires.
+  function forceRevealAll() {
+    var all = document.querySelectorAll(
+      '.reveal-img, .hero-name, .hero-subtitle, .scatter-word-wrap, ' +
+      '.scroll-reveal, .scroll-reveal-img, .scroll-reveal-line, .scroll-reveal-fade, .gallery-reveal'
+    );
+    all.forEach(function (el) { el.classList.add('in'); });
+    document.documentElement.classList.add('scroll-ready');
+    var ls = document.getElementById('loadingScreen');
+    if (ls) ls.classList.add('hide');
+    unlockScroll();
+  }
+  setTimeout(forceRevealAll, 6500);
+
+  window.addEventListener('resize', resizeCanvas);
+  window.__loaderStartedAt = performance.now();
+
+  function startPage() {
+    resizeCanvas();
+    setActiveLink();
+
+    // If the page was opened directly with a #hash, jump there correctly
+    // now that the real scale is known (instead of trusting the browser's
+    // early, pre-resize anchor jump).
+    var link = document.querySelector('.nav-link[href="' + location.hash + '"]');
+    if (link) {
+      setTimeout(function () {
+        scrollToTarget(parseFloat(link.getAttribute('data-target')));
+      }, 50);
+    }
+
+    // Hold the loader long enough to be seen (minimumLoaderTime), but also
+    // don't reveal until images have actually finished loading -- otherwise
+    // the hero photo can pop in mid-animation on a slow or cold-cache load,
+    // while looking fine on a fast/cached one. Whichever condition is slower
+    // wins; forceRevealAll() below is still the final safety net.
+    var loadingScreen = document.getElementById('loadingScreen');
+    var loaderStartedAt = window.__loaderStartedAt || performance.now();
+    var minimumLoaderTime = 2800;
+    var elapsed = performance.now() - loaderStartedAt;
+    var remaining = Math.max(0, minimumLoaderTime - elapsed);
+
+    var minimumTimeElapsed = false;
+    var pageFullyLoaded = (document.readyState === 'complete');
+
+    function finishLoading() {
+      if (!minimumTimeElapsed || !pageFullyLoaded) return;
+      if (loadingScreen) loadingScreen.classList.add('hide');
+      unlockScroll();
+      playEntranceAnimation();
+
+      // Let the hero entrance breathe before scroll reveals become active.
+      clearTimeout(scrollRevealTimer);
+      scrollRevealTimer = setTimeout(function () {
+        initScrollAnimations();
+      }, 1500);
+    }
+
+    if (!pageFullyLoaded) {
+      window.addEventListener('load', function () {
+        pageFullyLoaded = true;
+        finishLoading();
+      }, { once: true });
+    }
+
+    setTimeout(function () {
+      minimumTimeElapsed = true;
+      finishLoading();
+    }, remaining);
+  }
+
+  // Start immediately; don't wait for every image on the page.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPage, { once: true });
+  } else {
+    startPage();
+  }
+</script>
+</body>
+</html>
