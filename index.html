@@ -394,7 +394,7 @@
 
     <!-- ===== HERO IMAGE ===== -->
     <div class="abs reveal-img" style="left:747px; top:135px; width:460px; height:945px; overflow:hidden;">
-      <img src="christine-pose1.png" alt="Christine" style="width:100%; height:100%; object-fit:cover;">
+      <img src="s/christine-pose1.png" alt="Christine" style="width:100%; height:100%; object-fit:cover;">
     </div>
 
     <!-- ===== SCATTERED WORDS ===== -->
@@ -691,11 +691,11 @@
   }
 
   // ===== Onload entrance: hero section only =====
-  // Called once both the minimum loader time has passed and the window
-  // 'load' event has fired (see startPage below), so every image on the
-  // page -- pose 1 included -- is guaranteed to have already finished
-  // loading. That means there's nothing to poll or wait on here: every
-  // delay below is fixed, so nothing can stack up or run long.
+  // Called once both the minimum loader time has passed and the hero
+  // photo (pose 1) has finished loading (see startPage below), so it's
+  // guaranteed to be ready. That means there's nothing to poll or wait
+  // on here: every delay below is fixed, so nothing can stack up or run
+  // long.
   function playEntranceAnimation() {
     var heroName = document.querySelector('.hero-name');
     var heroSubtitle = document.querySelector('.hero-subtitle');
@@ -757,21 +757,26 @@
     }
 
     // Hold the loader long enough to be seen (minimumLoaderTime), but also
-    // don't reveal until images have actually finished loading -- otherwise
-    // the hero photo can pop in mid-animation on a slow or cold-cache load,
-    // while looking fine on a fast/cached one. Whichever condition is slower
-    // wins; forceRevealAll() below is still the final safety net.
+    // don't reveal until the hero photo has actually finished loading --
+    // otherwise it can pop in mid-animation on a slow or cold-cache load.
+    // Only the hero image is checked here: the gallery/signature images
+    // further down the page are off-screen and get their own separate
+    // scroll-triggered reveal later, so a slow-loading pose3/pose4 image
+    // shouldn't hold up the initial hero entrance. Whichever of the two
+    // conditions is slower wins; forceRevealAll() below is still the
+    // final safety net.
     var loadingScreen = document.getElementById('loadingScreen');
     var loaderStartedAt = window.__loaderStartedAt || performance.now();
     var minimumLoaderTime = 2800;
     var elapsed = performance.now() - loaderStartedAt;
     var remaining = Math.max(0, minimumLoaderTime - elapsed);
 
+    var heroImgEl = document.querySelector('.reveal-img img');
     var minimumTimeElapsed = false;
-    var pageFullyLoaded = (document.readyState === 'complete');
+    var heroImageReady = !heroImgEl || heroImgEl.complete;
 
     function finishLoading() {
-      if (!minimumTimeElapsed || !pageFullyLoaded) return;
+      if (!minimumTimeElapsed || !heroImageReady) return;
       if (loadingScreen) loadingScreen.classList.add('hide');
       unlockScroll();
       playEntranceAnimation();
@@ -783,11 +788,13 @@
       }, 1500);
     }
 
-    if (!pageFullyLoaded) {
-      window.addEventListener('load', function () {
-        pageFullyLoaded = true;
+    if (heroImgEl && !heroImgEl.complete) {
+      function onHeroImgSettled() {
+        heroImageReady = true;
         finishLoading();
-      }, { once: true });
+      }
+      heroImgEl.addEventListener('load', onHeroImgSettled, { once: true });
+      heroImgEl.addEventListener('error', onHeroImgSettled, { once: true });
     }
 
     setTimeout(function () {
